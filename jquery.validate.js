@@ -659,6 +659,8 @@ $.extend($.validator, {
           label.removeClass( this.settings.validClass ).addClass( this.settings.errorClass );
         if(label.hasClass('replaceable')){
           if(!$(element).attr('validationdefault')) $(element).attr('validationdefault', label.text());
+          if(message == this.defaultMessage(element, 'default', $(element).attr('validationdefault'))) 
+            label.removeClass( this.settings.validClass );
           label.html(message);
         }
         else{
