@@ -11,7 +11,13 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-	$("#commentForm").validate();
+    $("#commentForm").validate(
+      {messages: {
+        otheremail:{
+          success: 'Double email all the way!'
+        }
+      }}
+    );
 });
 </script>
 
@@ -19,6 +25,7 @@ $(document).ready(function() {
 #commentForm { width: 500px; }
 #commentForm label { width: 250px; }
 #commentForm label.error, #commentForm input.submit { margin-left: 253px; }
+#commentForm label.error.replaceable { margin-left: 0; }
 </style>
 
 </head>
@@ -38,6 +45,10 @@ $(document).ready(function() {
 		<p>
 			<label for="curl">URL (optional)</label>
 			<input id="curl" name="url" class="url" value="" />
+		</p>
+    <p>
+			<label for="otheremail" class="replaceable">Enter your other email</label>
+			<input id="otheremail" name='otheremail' class="email" value="" />
 		</p>
 		<p>
 			<label for="ccomment">Your comment (required)</label>

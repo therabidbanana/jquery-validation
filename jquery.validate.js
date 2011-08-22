@@ -378,8 +378,8 @@ $.extend($.validator, {
 					});
 				}
 				// remove items from success list
-				this.successList = $.grep( this.successList, function(element) {
-					return !(element.name in errors);
+				this.successList = $.grep( this.successList, function(s) {
+					return !(s.element.name in errors);
 				});
 			}
 			this.settings.showErrors
@@ -466,8 +466,11 @@ $.extend($.validator, {
 			return $( selector )[0];
 		},
 
-		errors: function() {
-			return $( this.settings.errorElement + "." + this.settings.errorClass, this.errorContext );
+		errors: function(replaceable_class) {
+      var errorTypes = this.settings.errorElement + "." + this.settings.errorClass;
+      if(replaceable_class)
+        errorTypes = errorTypes +','+this.settings.errorElement + "." + replaceable_class;
+			return $( errorTypes, this.errorContext );
 		},
 
 		reset: function() {
@@ -527,10 +530,22 @@ $.extend($.validator, {
 					throw e;
 				}
 			}
-			if (dependencyMismatch)
-				return;
-			if ( this.objectLength(rules) )
-				this.successList.push(element);
+			if (dependencyMismatch){
+        var default_message = $(element).attr('validationdefault') || false;
+        var message = this.defaultMessage(element, 'default', default_message);
+        if(message)
+          this.showLabel(element, message, true);
+        return;
+      }
+			if ( this.objectLength(rules) ){
+        var message = this.defaultMessage(element, 'success');
+        if(message){
+          this.successList.push({message: message, element: element});
+          this.showLabel(element, message, true);
+        }
+        else
+          this.successList.push({message: null, element: element});
+      }
 			return true;
 		},
 
@@ -564,14 +579,15 @@ $.extend($.validator, {
 			return undefined;
 		},
 
-		defaultMessage: function( element, method) {
+		defaultMessage: function( element, method, true_default) {
+      var default_message = (true_default === undefined ? "<strong>Warning: No message defined for " + element.name + "</strong>" : true_default);
 			return this.findDefined(
 				this.customMessage( element.name, method ),
 				this.customMetaMessage( element, method ),
 				// title is never undefined, so handle empty string as undefined
 				!this.settings.ignoreTitle && element.title || undefined,
 				$.validator.messages[method],
-				"<strong>Warning: No message defined for " + element.name + "</strong>"
+				default_message
 			);
 		},
 
@@ -609,7 +625,7 @@ $.extend($.validator, {
 			}
 			if (this.settings.success) {
 				for ( var i = 0; this.successList[i]; i++ ) {
-					this.showLabel( this.successList[i] );
+					this.showLabel( this.successList[i].element, this.successList[i].message, true );
 				}
 			}
 			if (this.settings.unhighlight) {
@@ -632,14 +648,24 @@ $.extend($.validator, {
 			});
 		},
 
-		showLabel: function(element, message) {
-			var label = this.errorsFor( element );
+		showLabel: function(element, message, is_success) {
+			var label = this.errorsFor( element, 'replaceable' );
+      var success_message = is_success || false;
 			if ( label.length ) {
 				// refresh error/success class
-				label.removeClass( this.settings.validClass ).addClass( this.settings.errorClass );
-
-				// check if we have a generated label, replace the message then
-				label.attr("generated") && label.html(message);
+				if(is_success)
+          label.addClass( this.settings.validClass ).removeClass( this.settings.errorClass );
+        else
+          label.removeClass( this.settings.validClass ).addClass( this.settings.errorClass );
+        if(label.hasClass('replaceable')){
+          if(!$(element).attr('validationdefault')) $(element).attr('validationdefault', label.text());
+          label.html(message);
+        }
+        else{
+          // check if we have a generated label, replace the message then
+          (label.attr("generated")) && label.html(message);
+          
+        }
 			} else {
 				// create label
 				label = $("<" + this.settings.errorElement + "/>")
@@ -665,9 +691,9 @@ $.extend($.validator, {
 			this.toShow = this.toShow.add(label);
 		},
 
-		errorsFor: function(element) {
+		errorsFor: function(element, replaceable_class) {
 			var name = this.idOrName(element);
-    		return this.errors().filter(function() {
+    		return this.errors(replaceable_class).filter(function() {
 				return $(this).attr('for') == name;
 			});
 		},
@@ -966,7 +992,7 @@ $.extend($.validator, {
 						var submitted = validator.formSubmitted;
 						validator.prepareElement(element);
 						validator.formSubmitted = submitted;
-						validator.successList.push(element);
+						validator.successList.push({element: element, message: this.defaultMessage(element, 'success')});
 						validator.showErrors();
 					} else {
 						var errors = {};
