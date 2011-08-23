@@ -273,7 +273,7 @@ test("showErrors()", function() {
 	equals( true, $("label.error[for=lastname]").is(":visible") );
 });
 
-test("showErrors() replaceable labels", function() {
+test("showErrors()", function() {
 	expect( 4 );
 	var errorLabel = $('#errorFirstname').hide();
 	var element = $('#firstname')[0];
@@ -283,6 +283,60 @@ test("showErrors() replaceable labels", function() {
 	v.showErrors({"firstname": "required", "lastname": "bla"});
 	equals( true, errorLabel.is(":visible") );
 	equals( true, $("label.error[for=lastname]").is(":visible") );
+});
+
+test("showErrors() replaceable labels", function() {
+	expect( 8 );
+	var errorLabel = $('#firstnamerLabel');
+	var element = $('#firstnamer')[0];
+  var default_text = errorLabel.text();
+	var v = $('#testFormR').validate({
+    replaceableClass: 'replaceable'
+  });
+	ok( errorLabel.is(":visible") );
+	equals( 0, $("label.error[for=firstnamer]").size() );
+  $(element).val('dlh');
+  v.element(element);
+	equals( true, errorLabel.is(":visible") );
+	equals( true, errorLabel.hasClass("error") );
+	equals( "Please enter at least 5 characters.", errorLabel.text() );
+  $(element).val('');
+  v.element(element);
+	equals( true, errorLabel.is(":visible") );
+	equals( false, errorLabel.hasClass("error") );
+	equals( default_text, errorLabel.text() );
+});
+
+test("showErrors() success messages", function() {
+	expect( 12 );
+	var errorLabel = $('#firstnamerLabel');
+	var element = $('#firstnamer')[0];
+  var default_text = errorLabel.text();
+	var v = $('#testFormR').validate({
+    replaceableClass: 'replaceable',
+    messages: {
+      firstnamer:{ success: "Congrats on having a valid name."}
+    }
+  });
+	ok( errorLabel.is(":visible") );
+	equals( 0, $("label.error[for=firstnamer]").size() );
+  $(element).val('david');
+  v.element(element);
+	equals( true, errorLabel.is(":visible") );
+	equals( true, errorLabel.hasClass("valid") );
+	equals( "Congrats on having a valid name.", errorLabel.text() );
+  $(element).val('');
+  v.element(element);
+	equals( true, errorLabel.is(":visible") );
+	equals( false, errorLabel.hasClass("valid") );
+	equals( default_text, errorLabel.text() );
+
+  $(element).val('dlh');
+  v.element(element);
+	equals( true, errorLabel.is(":visible") );
+	equals( true, errorLabel.hasClass("error") );
+	equals( false, errorLabel.hasClass("valid") );
+	equals( "Please enter at least 5 characters.", errorLabel.text() );
 });
 
 test("showErrors(), allow empty string and null as default message", function() {
