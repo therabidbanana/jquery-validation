@@ -538,7 +538,9 @@ $.extend($.validator, {
         return;
       }
 			if ( this.objectLength(rules) ){
-        var message = this.defaultMessage(element, 'success');
+
+        var message = this.defaultMessage(element, 'success', false);
+
         if(message){
           this.successList.push({message: message, element: element});
           this.showLabel(element, message, true);
@@ -581,11 +583,13 @@ $.extend($.validator, {
 
 		defaultMessage: function( element, method, true_default) {
       var default_message = (true_default === undefined ? "<strong>Warning: No message defined for " + element.name + "</strong>" : true_default);
+      var title = !this.settings.ignoreTitle && element.title || undefined;
+      title = (true_default === undefined ? title : undefined);
 			return this.findDefined(
 				this.customMessage( element.name, method ),
 				this.customMetaMessage( element, method ),
 				// title is never undefined, so handle empty string as undefined
-				!this.settings.ignoreTitle && element.title || undefined,
+				title,
 				$.validator.messages[method],
 				default_message
 			);
@@ -649,15 +653,15 @@ $.extend($.validator, {
 		},
 
 		showLabel: function(element, message, is_success) {
-			var label = this.errorsFor( element, 'replaceable' );
+			var label = this.errorsFor( element, this.settings.replaceableClass );
       var success_message = is_success || false;
 			if ( label.length ) {
 				// refresh error/success class
-				if(is_success)
+				if(success_message && message)
           label.addClass( this.settings.validClass ).removeClass( this.settings.errorClass );
         else
           label.removeClass( this.settings.validClass ).addClass( this.settings.errorClass );
-        if(label.hasClass('replaceable')){
+        if(label.hasClass(this.settings.replaceableClass)){
           if(!$(element).attr('validationdefault')) $(element).attr('validationdefault', label.text());
           if(message == this.defaultMessage(element, 'default', $(element).attr('validationdefault'))) 
             label.removeClass( this.settings.validClass );

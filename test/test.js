@@ -273,6 +273,18 @@ test("showErrors()", function() {
 	equals( true, $("label.error[for=lastname]").is(":visible") );
 });
 
+test("showErrors() replaceable labels", function() {
+	expect( 4 );
+	var errorLabel = $('#errorFirstname').hide();
+	var element = $('#firstname')[0];
+	var v = $('#testForm1').validate();
+	ok( errorLabel.is(":hidden") );
+	equals( 0, $("label.error[for=lastname]").size() );
+	v.showErrors({"firstname": "required", "lastname": "bla"});
+	equals( true, errorLabel.is(":visible") );
+	equals( true, $("label.error[for=lastname]").is(":visible") );
+});
+
 test("showErrors(), allow empty string and null as default message", function() {
 	$("#userForm").validate({
 		rules: {
@@ -464,6 +476,13 @@ test("defaultMessage(), empty title is ignored", function() {
 	var v = $("#userForm").validate();
 	equals( "This field is required.", v.defaultMessage($("#username")[0], "required") );
 });
+
+test("defaultMessage(), doesn't define anything for success", function() {
+	var v = $("#userForm").validate();
+	equals( false, v.defaultMessage($("#username")[0], "success", false) );
+	equals( "<strong>Warning: No message defined for username</strong>", v.defaultMessage($("#username")[0], "success") );
+});
+
 
 test("formatAndAdd", function() {
 	expect(4);
