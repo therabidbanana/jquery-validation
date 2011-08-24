@@ -314,8 +314,9 @@ test("showErrors() success messages", function() {
   var default_text = errorLabel.text();
 	var v = $('#testFormR').validate({
     replaceableClass: 'replaceable',
+    allowValid: true,
     messages: {
-      firstnamer:{ success: "Congrats on having a valid name."}
+      firstnamer:{ valid: "Congrats on having a valid name."}
     }
   });
 	ok( errorLabel.is(":visible") );
@@ -337,6 +338,46 @@ test("showErrors() success messages", function() {
 	equals( true, errorLabel.hasClass("error") );
 	equals( false, errorLabel.hasClass("valid") );
 	equals( "Please enter at least 5 characters.", errorLabel.text() );
+});
+
+test("showErrors() success messages without replaceable", function() {
+	expect( 10 );
+	var errorLabel = $('#firstnamesLabel');
+	var element = $('#firstnames')[0];
+  var label = $('label[generated*=true]');
+	var v = $('#testFormSuccess').validate({
+    allowValid: true, 
+    messages: {
+      firstnames:{ 
+        valid: "Congrats on having a valid name."
+      }
+    }
+  });
+	ok( errorLabel.is(":visible") );
+  
+  label = $('label[generated*=true]')
+	equals( 0, label.size() );
+  $(element).val('david');
+  v.element(element);
+  $(element).val('dlh');
+  v.element(element);
+  $(element).val('david');
+  v.element(element);
+  label = $('label[generated*=true]');
+	equals( true, $(element).hasClass("valid") );
+	equals( 1, label.size() );
+  equals( "Congrats on having a valid name.", label.text() );
+  $(element).val('');
+  v.element(element);
+
+  $(element).val('dlh');
+  v.element(element);
+  label = $('label[generated*=true]');
+	equals( true, label.is(":visible") );
+	equals( true, label.hasClass("error") );
+	equals( false, label.hasClass("valid") );
+	equals( 1, label.size() );
+	equals( "Please enter at least 5 characters.", label.text() );
 });
 
 test("showErrors(), allow empty string and null as default message", function() {
@@ -533,10 +574,22 @@ test("defaultMessage(), empty title is ignored", function() {
 
 test("defaultMessage(), doesn't define anything for success", function() {
 	var v = $("#userForm").validate();
-	equals( false, v.defaultMessage($("#username")[0], "success", false) );
+	equals( undefined, v.defaultMessage($("#username")[0], "success", false) );
 	equals( "<strong>Warning: No message defined for username</strong>", v.defaultMessage($("#username")[0], "success") );
 });
 
+test("defaultFormattedMessage()", function() {
+	expect(3);
+	var v = $("#form").validate();
+	var fakeElement = { form: $("#form")[0], name: "bar" };
+	equals( "Please enter no more than 2 characters.", v.defaultFormattedMessage(fakeElement, "maxlength", 2) );
+	
+	v.formatAndAdd(fakeElement, {method: "range", parameters:[2,4]})
+	equals( "Please enter a value between 2 and 4.", v.defaultFormattedMessage(fakeElement, "range", [2,4]) );
+	
+	v.formatAndAdd(fakeElement, {method: "range", parameters:[0,4]})
+	equals( "Please enter a value between 0 and 4.", v.defaultFormattedMessage(fakeElement, "range", [0,4]) );
+});
 
 test("formatAndAdd", function() {
 	expect(4);

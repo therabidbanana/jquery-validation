@@ -12,13 +12,17 @@
 <script type="text/javascript">
 $(document).ready(function() {
     $("#commentForm").validate(
-      {messages: {
-        otheremail:{
-success: 'Double email all the way!',
-default: 'No other email, no problem.'
-        }
+      {
+        allowValid: true,
+        messages: {
+          otheremail:{
+            valid: 'Double email all the way!',
+            default: 'No other email, no problem.'
+          },
+          awesome:{
+            valid: function(item, element){return element.value+" - That's pretty awesome."}
+          }
         }, 
-        replaceableClass: 'replaceable'
       }
     );
 });
@@ -53,6 +57,10 @@ default: 'No other email, no problem.'
     <p>
 			<label for="otheremail" class="replaceable">Enter your other email</label>
 			<input id="otheremail" name='otheremail' class="email" value="" />
+		</p>
+    <p>
+			<label for="awesome">Be Awesome</label>
+			<input id="awesome" name='awesome' class="required" value="" />
 		</p>
 		<p>
 			<label for="ccomment">Your comment (required)</label>
