@@ -1036,7 +1036,7 @@ $.extend($.validator, {
 						var submitted = validator.formSubmitted;
 						validator.prepareElement(element);
 						validator.formSubmitted = submitted;
-						validator.successList.push({element: element, message: this.defaultFormattedMessage(element, 'valid')});
+						validator.successList.push({element: element, message: validator.defaultFormattedMessage(element, 'valid')});
 						validator.showErrors();
 					} else {
 						var errors = {};
